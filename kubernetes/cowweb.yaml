@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cowweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cowweb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cowweb
+        version: v0.1
+    spec:
+      containers:
+      - name: cowweb
+        image: iad.ocir.io/gse00014510/acme-web-app/cowweb:v1.0
+        ports:
+        - name: api
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /cowsay/ping
+            port: api
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /cowsay/ping
+            port: api
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        imagePullPolicy: Always
+      imagePullSecrets:
+        - name: cowweb-secret
