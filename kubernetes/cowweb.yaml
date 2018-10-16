@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: cowweb
-        version: v0.1
+        version: v1.0
     spec:
       containers:
       - name: cowweb
