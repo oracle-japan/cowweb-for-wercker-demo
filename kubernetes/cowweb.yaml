@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: cowweb
 spec:
-  replicas: 1
+  replicas: 
   selector:
     matchLabels:
       app: cowweb
