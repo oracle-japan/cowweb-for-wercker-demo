@@ -67,7 +67,7 @@ deploy-to-cluster:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: delete -f $WERCKER_ROOT/kubernetes/cowweb_deploy.yaml --namespace=$COWWEB_NAMESPACE
+        command: delete deployments,services -l name=cowweb --namespace=$COWWEB_NAMESPACE
 
     - script:
        name: wait to delete resources
