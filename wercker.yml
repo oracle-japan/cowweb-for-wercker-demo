@@ -74,11 +74,18 @@ deploy-to-cluster:
        code: sleep 20
 
     - kubectl:
-        name: create objects
+        name: create deploymnet
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
         command: create -f $WERCKER_ROOT/kubernetes/cowweb_deploy.yaml --namespace=$COWWEB_NAMESPACE
+
+    - kubectl:
+        name: create nodeport
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: create -f $WERCKER_ROOT/kubernetes/cowweb-service-nodeport.yaml --namespace=$COWWEB_NAMESPACE
 
     - kubectl:
         name: get LoadBalancer public IP address
