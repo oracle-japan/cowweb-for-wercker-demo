@@ -1,52 +1,140 @@
-COWWEB
-======
-Cosay Web API.
+
+# Helidon Cowweb
+
+Cowweb porting on Helidon SE.
+
+## Build
 
 ```
-$ curl "http://localhost:8080/cowsay/say?message=Hello%20cowweb"
- ______________
-< Hello cowweb >
- --------------
+mvn package
+```
+
+## Start the application
+
+```
+java -jar target/cowweb-helidon.jar
+```
+
+## Exercise the application
+
+```
+curl -X GET http://localhost:8080/cowsay/say
+ ______
+< Moo! >
+ ------
         \   ^__^
          \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+curl -X GET http://localhost:8080/cowsay/think?message=Hello
+ _______
+( Hello )
+ -------
+        o   ^__^
+         o  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+curl -X GET 'http://localhost:8080/cowsay/think?message=Wow!&cowfile=www'
+ ______
+( Wow! )
+ ------
+        o   ^__^
+         o  (oo)\_______
             (__)\       )\/\
                 ||--WWW |
                 ||     ||
 ```
 
-How to build and run
---------------------
-
-### gradle
-Build a executable jar with dependencies and run localy.
-
-#### Inatall gradle.
-See [the official documentation](https://gradle.org/install/).
-
-#### Clone this repository.
+## Try health and metrics
 
 ```
-git clone https://github.com/hhiroshell/cowweb.git && cd cowweb
-```
+curl -s -X GET http://localhost:8080/health
+{"outcome":"UP",...
+. . .
 
-#### Build and run.
+# Prometheus Format
+curl -s -X GET http://localhost:8080/metrics
+# TYPE base:gc_g1_young_generation_count gauge
+. . .
 
-```
-gradle build
-```
-```
-java -jar build_local/dist/libs/cowweb-1.0.jar
-```
-
-#### Call the API.
-You can call the API via localhost:8080 .
-
-```
-curl "http://localhost:8080/cowsay/say"
-```
-
-And you can specify a message using "message" query (special characters have to be URL encorded).
+# JSON Format
+curl -H 'Accept: application/json' -X GET http://localhost:8080/metrics
+{"base":...
+. . .
 
 ```
-curl "http://localhost:8080/cowsay/say?message=hello%20cowweb"
+
+## Build the Docker Image
+
+```
+docker build -t cowweb-helidon .
+```
+
+## Start the application with Docker
+
+```
+docker run --rm --name cowweb -p 8080:8080 cowweb-helidon:latest
+```
+
+Exercise the application as described above
+
+## Deploy the application to Kubernetes
+
+```
+kubectl cluster-info                # Verify which cluster
+kubectl get pods                    # Verify connectivity to cluster
+kubectl create -f app.yaml          # Deply application
+kubectl get service cowweb-helidon  # Get service info
+```
+
+## Native image with GraalVM
+
+GraalVM allows you to compile your programs ahead-of-time into a native
+ executable. See https://www.graalvm.org/docs/reference-manual/aot-compilation/
+ for more information.
+
+You can build a native executable in 2 different ways:
+* With a local installation of GraalVM
+* Using Docker
+
+### Local build
+
+Download Graal VM at https://github.com/oracle/graal/releases, the version
+ currently supported for Helidon is `19.0.0`.
+
+```
+# Setup the environment
+export GRAALVM_HOME=/path
+# build the native executable
+mvn package -Pnative-image
+```
+
+You can also put the Graal VM `bin` directory in your PATH, or pass
+ `-DgraalVMHome=/path` to the Maven command.
+
+See https://github.com/oracle/helidon-build-tools/tree/master/helidon-maven-plugin
+ for more information.
+
+Start the application:
+
+```
+./target/cowweb-helidon
+```
+
+### Multi-stage Docker build
+
+Build the "native" Docker Image
+
+```
+docker build -t cowweb-helidon-native -f Dockerfile.native .
+```
+
+Start the application:
+
+```
+docker run --rm --name cowweb -p 8080:8080 cowweb-helidon-native:latest
 ```

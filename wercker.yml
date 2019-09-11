@@ -1,5 +1,5 @@
 box:
-  id: openjdk:8-jdk
+  id: maven:3.5.4-jdk-9
   ports:
     - 8080
 
@@ -11,7 +11,7 @@ dev:
     - internal/watch:
         name: Run and Watch
         code: |
-          ./gradlew bootRun
+          mvn exec:java
         reload: true
 
 build:
@@ -20,38 +20,41 @@ build:
         name: info/env
         code: env
     - script:
-        name: prepare gradlew
+        name: maven build
         code: |
-          chmod +x ./gradlew
-    - script:
-        name: gradle build
-        code: |
-          ./gradlew --full-stacktrace -q --project-cache-dir=$WERCKER_CACHE_DIR build
+          mvn package -DskipTests
 
 integration-test:
   steps:
     - script:
         name: Run and IT
         code: |
-          java -jar $WERCKER_ROOT/build/libs/cowweb-1.0.jar &
-          sleep 5
-          ./gradlew --full-stacktrace -q --project-cache-dir=$WERCKER_CACHE_DIR integrationTest
+          mvn test
 
 push-to-releases:
   steps:
+    - internal/docker-build: 
+        dockerfile: Dockerfile 
+        image-name: cowweb-interim # name used to refer to this image until it's pushed   
+
     - internal/docker-push:
+        image-name: cowweb-interim
         username: $REGISTRY_USERNAME
         password: $REGISTRY_PASSWORD
         repository: ${region-code}.ocir.io/${tenancy-name}/${repository}/cowweb
         tag: v1.0
-        ports: 8080
-        cmd: java -jar /pipeline/source/build/libs/cowweb-1.0.jar
 
 deploy-to-cluster:
   box:
     id: alpine
     cmd: /bin/sh
   steps:
+    - script:
+        name: prepare
+        code: |
+          sed -e "s/\$\{region-code\}/${region-code}/g" -e "s/\$\{tenancy\}/${tenancy}/g" -e "s/\$\{repository\}/${repository}/g" kubernetes/cowweb.yaml > kubernetes/cowweb_deploy.yaml
+          cat kubernetes/cowweb_deploy.yaml
+    
     - kubectl:
         name: connection testing
         server: $KUBERNETES_MASTER
