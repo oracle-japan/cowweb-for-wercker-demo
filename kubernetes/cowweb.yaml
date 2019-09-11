@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: cowweb
-        image: ${region-code}.ocir.io/${tenancy}/${repository}/cowweb:v1.0
+        image: _OCIR_REGION_.ocir.io/_OCIR_TENANCY_/_OCIR_REPOSITORY_/cowweb:v1.0
         ports:
         - name: api
           containerPort: 8080

@@ -50,9 +50,9 @@ deploy-to-cluster:
     cmd: /bin/sh
   steps:
     - script:
-        name: prepare
+        name: replace ocir params
         code: |
-          sed -e "s/\$\{region-code\}/${region-code}/g" -e "s/\$\{tenancy\}/${tenancy}/g" -e "s/\$\{repository\}/${repository}/g" kubernetes/cowweb.yaml > kubernetes/cowweb_deploy.yaml
+          sed -e "s/_OCIR_REGION_/$OCIR_REGION/g" -e "s/_OCIR_TENANCY_/$OCIR_TENANCY/g" -e "s/_OCIR_REPOSITORY_/$OCIR_REPOSITORY/g" kubernetes/cowweb.yaml > kubernetes/cowweb_deploy.yaml
           cat kubernetes/cowweb_deploy.yaml
     
     - kubectl:
@@ -67,7 +67,7 @@ deploy-to-cluster:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: delete -f $WERCKER_ROOT/kubernetes/cowweb.yaml --namespace=$COWWEB_NAMESPACE
+        command: delete -f $WERCKER_ROOT/kubernetes/cowweb_deploy.yaml --namespace=$COWWEB_NAMESPACE
 
     - script:
        name: wait to delete resources
@@ -78,7 +78,7 @@ deploy-to-cluster:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: create -f $WERCKER_ROOT/kubernetes/cowweb.yaml --namespace=$COWWEB_NAMESPACE
+        command: create -f $WERCKER_ROOT/kubernetes/cowweb_deploy.yaml --namespace=$COWWEB_NAMESPACE
 
     - kubectl:
         name: get LoadBalancer public IP address
