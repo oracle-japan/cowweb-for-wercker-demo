@@ -41,7 +41,7 @@ push-to-releases:
         image-name: cowweb-interim
         username: $REGISTRY_USERNAME
         password: $REGISTRY_PASSWORD
-        repository: ${region-code}.ocir.io/${tenancy-name}/${repository}/cowweb
+        repository: $OCIR_REGION.ocir.io/$OCIR_TENANCY/$OCIR_REPOSITORY/cowweb
         tag: v1.0
 
 deploy-to-cluster:
