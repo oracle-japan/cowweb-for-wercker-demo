@@ -1,15 +1,45 @@
-FROM gradle:jdk8-alpine as builder
+#
+# Copyright (c) 2018, 2019 Oracle and/or its affiliates. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-COPY --chown=gradle:gradle ./build.gradle /home/gradle/
-COPY --chown=gradle:gradle ./settings.gradle /home/gradle/
-COPY --chown=gradle:gradle ./src /home/gradle/src
-RUN gradle build -Pbuilddir=build
+# 1st stage, build the app
+FROM maven:3.5.4-jdk-9 as build
 
-FROM java:8-jre-alpine
+WORKDIR /cowweb
 
-RUN addgroup -S -g 1000 app \
-    && adduser -D -S -G app -u 1000 -s /bin/ash app
-USER app
-WORKDIR /home/app
-COPY --from=builder --chown=app:app /home/gradle/build/libs/cowweb-1.0.jar .
-CMD ["java", "-jar", "/home/app/cowweb-1.0.jar"]
+# Create a first layer to cache the "Maven World" in the local repository.
+# Incremental docker builds will always resume after that, unless you update
+# the pom
+ADD pom.xml .
+RUN mvn package -DskipTests
+
+# Do the Maven build!
+# Incremental docker builds will resume here when you change sources
+ADD src src
+RUN mvn package -DskipTests
+
+RUN echo "done!"
+
+# 2nd stage, build the runtime image
+FROM openjdk:8-jre-slim
+WORKDIR /cowweb
+
+# Copy the binary built in the 1st stage
+COPY --from=build /cowweb/target/cowweb-helidon.jar ./
+COPY --from=build /cowweb/target/libs ./libs
+
+CMD ["java", "-jar", "cowweb-helidon.jar"]
+
+EXPOSE 8080
