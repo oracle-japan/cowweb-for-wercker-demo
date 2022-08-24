@@ -28,7 +28,7 @@ curl -X GET http://localhost:8080/cowsay/say
                 ||----w |
                 ||     ||
 
-curl -X GET http://localhost:8080/cowsay/say?message=Hello
+curl -X GET http://localhost:8080/cowsay/say?say=Hello
  _______
 < Hello >
  -------
@@ -38,7 +38,7 @@ curl -X GET http://localhost:8080/cowsay/say?message=Hello
                 ||----w |
                 ||     ||
 
-curl -X GET http://localhost:8080/cowsay/say?message=Wow!&cowfile=www
+curl -X GET http://localhost:8080/cowsay/say?say=Wow!&cowfile=www
  _______
 < Wow! >
  -------
@@ -62,7 +62,7 @@ curl -X GET http://localhost:8080/cowsay/think
                 ||----w |
                 ||     ||
 
-curl -X GET http://localhost:8080/cowsay/think?message=Hello
+curl -X GET http://localhost:8080/cowsay/think?think=Hello
  _______
 ( Hello )
  -------
@@ -72,7 +72,7 @@ curl -X GET http://localhost:8080/cowsay/think?message=Hello
                 ||----w |
                 ||     ||
 
-curl -X GET http://localhost:8080/cowsay/think?message=Wow!&cowfile=www
+curl -X GET http://localhost:8080/cowsay/think?think=Wow!&cowfile=www
  ______
 ( Wow! )
  ------
