@@ -1,0 +1,15 @@
+# Microprofile server properties
+server:
+  port: 8080
+  host: 0.0.0.0
+
+# Change the following to true to enable the optional MicroProfile Metrics REST.request metrics
+metrics:
+  rest-request:
+    enabled: false
+
+# Cowweb config
+cowweb:
+  message: Moo!
+  cowfile: default
+  ping-message: "I'm working...\n"
