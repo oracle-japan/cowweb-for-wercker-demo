@@ -70,7 +70,7 @@ public class CowsayResource {
     @GET
     @Path("/ping")
     public String ping() {
-        LOGGER.info(pingReplyMessage);
-        return pingReplyMessage;
+        System.out.println("I'm working...");
+        return "I'm working...";
     }
 }
