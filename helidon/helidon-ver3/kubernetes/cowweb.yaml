@@ -22,13 +22,13 @@ spec:
               containerPort: 8080
           readinessProbe:
             httpGet:
-              path: /health/ready
+              path: /cowsay/ping
               port: api
             initialDelaySeconds: 30
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health/live
+              path: /cowsay/ping
               port: api
             initialDelaySeconds: 30
             periodSeconds: 5
