@@ -1,5 +1,5 @@
-apiVersion: apps/v1
 kind: Deployment
+apiVersion: apps/v1
 metadata:
   name: cowweb
 spec:
@@ -7,34 +7,30 @@ spec:
   selector:
     matchLabels:
       app: cowweb
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
   template:
     metadata:
       labels:
         app: cowweb
+        version: v1
     spec:
       containers:
-      - name: cowweb
-        image: ${region-code}.ocir.io/${tenancy}/${repository}/cowweb:v1.0
-        ports:
-        - name: api
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /cowsay/ping
-            port: api
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /cowsay/ping
-            port: api
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        imagePullPolicy: Always
+        - name: cowweb
+          image: ${region-code}.ocir.io/${tenancy}/${repository}/cowweb:v1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: api
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /cowsay/ping
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /cowsay/ping
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 5
       imagePullSecrets:
         - name: cowweb-secret
