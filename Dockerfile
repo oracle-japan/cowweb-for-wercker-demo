@@ -1,15 +1,30 @@
-FROM gradle:jdk8-alpine as builder
 
-COPY --chown=gradle:gradle ./build.gradle /home/gradle/
-COPY --chown=gradle:gradle ./settings.gradle /home/gradle/
-COPY --chown=gradle:gradle ./src /home/gradle/src
-RUN gradle build -Pbuilddir=build
+# 1st stage, build the app
+FROM maven:3.8.4-openjdk-17-slim as build
 
-FROM openjdk:8-jre-alpine
+WORKDIR /helidon
 
-RUN addgroup -S -g 1000 app \
-    && adduser -D -S -G app -u 1000 -s /bin/ash app
-USER app
-WORKDIR /home/app
-COPY --from=builder --chown=app:app /home/gradle/build/libs/cowweb-1.0.jar .
-CMD ["java", "-jar", "/home/app/cowweb-1.0.jar"]
+# Create a first layer to cache the "Maven World" in the local repository.
+# Incremental docker builds will always resume after that, unless you update
+# the pom
+ADD pom.xml .
+RUN mvn package -Dmaven.test.skip -Declipselink.weave.skip
+
+# Do the Maven build!
+# Incremental docker builds will resume here when you change sources
+ADD src src
+RUN mvn package -DskipTests
+
+RUN echo "done!"
+
+# 2nd stage, build the runtime image
+FROM openjdk:17-jdk-slim
+WORKDIR /helidon
+
+# Copy the binary built in the 1st stage
+COPY --from=build /helidon/target/cowweb-helidon.jar ./
+COPY --from=build /helidon/target/libs ./libs
+
+CMD ["java", "-jar", "cowweb-helidon.jar"]
+
+EXPOSE 8080

@@ -1,12 +1,19 @@
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
   name: cowweb
+  labels:
+    app: cowweb
+  annotations:
+    oci.oraclecloud.com/load-balancer-type: "lb"
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "10"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "30"
 spec:
-  ports:
-  - name: http
-    port: 80
-    targetPort: 8080
+  type: LoadBalancer
   selector:
     app: cowweb
-  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
