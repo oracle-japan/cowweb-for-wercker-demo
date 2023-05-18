@@ -32,5 +32,3 @@ spec:
               port: api
             initialDelaySeconds: 30
             periodSeconds: 5
-      imagePullSecrets:
-        - name: cowweb-secret
