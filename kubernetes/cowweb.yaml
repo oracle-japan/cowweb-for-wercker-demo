@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: cowweb
-          image: ${region-code}.ocir.io/${tenancy}/${repository}/cowweb:v1.0
+          image: ocir.${region-identifer}.oci.oraclecloud.com/${tenancy}/${repository}/cowweb:v1.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: api
